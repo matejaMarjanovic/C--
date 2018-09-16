@@ -1,0 +1,188 @@
+%{
+
+    #include <iostream>
+    #include <cstdlib>
+    #include <string>
+    #include <vector>
+    #include "ast.hpp"
+    using namespace std;
+
+    extern void yyerror(const string &msg);
+    int yylex();
+
+%}
+
+%union {
+    int i;
+    double d;
+    string* s;
+}
+
+%token intTypeToken doubleTypeToken mainToken returnToken ifToken elseToken
+%token gteqToken lteqToken eqToken neqToken
+%token <s> idToken
+%token <i> intToken
+%token <d> doubleToken
+
+
+%left '>' '<' lteqToken gteqToken eqToken neqToken
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+program
+    : mainFunction {
+    
+    }
+    ;
+
+mainFunction
+    : type mainToken '(' funcParameters ')' block {
+    
+    }
+    | type mainToken '(' ')' block {
+    
+    }
+    ;
+    
+type
+    : intTypeToken {
+    
+    }
+    | doubleTypeToken {
+    
+    }
+    ;
+    
+funcParameters
+    : funcParameters ',' type idToken {
+    
+    }
+    | type idToken {
+    
+    }
+    ;
+
+block
+    : '{' statements '}' {
+    
+    }
+    ;
+    
+statements
+    : statements statement {
+    
+    }
+    | statement {
+    
+    }
+    ;
+    
+statement
+    : declaration ';' {
+    
+    }
+    | idToken '=' expression ';' {
+    
+    }
+    | expression ';' {
+    
+    }
+    | returnToken expression ';' {
+    
+    }
+    | ifToken '(' expression ')' block {
+    
+    }
+    | ifToken '(' expression ')' block elseToken block {
+    
+    }
+    ;
+
+declaration
+    : type listVars {
+    
+    }
+    ;
+    
+listVars
+    : listVars ',' idToken {
+    
+    }
+    | idToken {
+    
+    }
+    | listVars ',' idToken '=' expression {
+    
+    }
+    | idToken '=' expression {
+    
+    }
+    ;
+    
+expression
+    : expression '+' expression {
+    
+    }
+    | expression '-' expression {
+    
+    }
+    | expression '*' expression {
+    
+    }
+    | expression '/' expression {
+    
+    }
+    | expression '>' expression {
+    
+    }
+    | expression '<' expression {
+    
+    }
+    | expression gteqToken expression {
+    
+    }
+    | expression lteqToken expression {
+    
+    }
+    | expression eqToken expression {
+    
+    }
+    | expression neqToken expression {
+    
+    }
+    | idToken '(' funcCallArgs ')' {
+    
+    }
+    | idToken {
+    
+    }
+    | intToken {
+    
+    }
+    | doubleToken {
+    
+    }
+    ;
+    
+funcCallArgs
+    : funcCallArgs ',' expression {
+    
+    }
+    | expression {
+    
+    }
+    | {
+    
+    }
+    ;
+    
+%%
+
+int main() {
+    yyparse();
+    return 0;
+}
+
+
