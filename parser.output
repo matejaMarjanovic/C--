@@ -1,0 +1,1125 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: mainFunction
+
+    2 mainFunction: type mainToken '(' funcParameters ')' block
+    3             | type mainToken '(' ')' block
+
+    4 type: intTypeToken
+    5     | doubleTypeToken
+
+    6 funcParameters: funcParameters ',' type idToken
+    7               | type idToken
+
+    8 block: '{' statements '}'
+
+    9 statements: statements statement
+   10           | statement
+
+   11 statement: declaration ';'
+   12          | idToken '=' expression ';'
+   13          | expression ';'
+   14          | returnToken expression ';'
+   15          | ifToken '(' expression ')' block
+   16          | ifToken '(' expression ')' block elseToken block
+
+   17 declaration: type listVars
+
+   18 listVars: listVars ',' idToken
+   19         | idToken
+   20         | listVars ',' idToken '=' expression
+   21         | idToken '=' expression
+
+   22 expression: expression '+' expression
+   23           | expression '-' expression
+   24           | expression '*' expression
+   25           | expression '/' expression
+   26           | expression '>' expression
+   27           | expression '<' expression
+   28           | expression gteqToken expression
+   29           | expression lteqToken expression
+   30           | expression eqToken expression
+   31           | expression neqToken expression
+   32           | idToken '(' funcCallArgs ')'
+   33           | idToken
+   34           | intToken
+   35           | doubleToken
+
+   36 funcCallArgs: funcCallArgs ',' expression
+   37             | expression
+   38             | %empty
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 2 3 15 16 32
+')' (41) 2 3 15 16 32
+'*' (42) 24
+'+' (43) 22
+',' (44) 6 18 20 36
+'-' (45) 23
+'/' (47) 25
+';' (59) 11 12 13 14
+'<' (60) 27
+'=' (61) 12 20 21
+'>' (62) 26
+'{' (123) 8
+'}' (125) 8
+error (256)
+intTypeToken (258) 4
+doubleTypeToken (259) 5
+mainToken (260) 2 3
+returnToken (261) 14
+ifToken (262) 15 16
+elseToken (263) 16
+gteqToken (264) 28
+lteqToken (265) 29
+eqToken (266) 30
+neqToken (267) 31
+idToken (268) 6 7 12 18 19 20 21 32 33
+intToken (269) 34
+doubleToken (270) 35
+
+
+Nonterminals, with rules where they appear
+
+$accept (29)
+    on left: 0
+program (30)
+    on left: 1, on right: 0
+mainFunction (31)
+    on left: 2 3, on right: 1
+type (32)
+    on left: 4 5, on right: 2 3 6 7 17
+funcParameters (33)
+    on left: 6 7, on right: 2 6
+block (34)
+    on left: 8, on right: 2 3 15 16
+statements (35)
+    on left: 9 10, on right: 8 9
+statement (36)
+    on left: 11 12 13 14 15 16, on right: 9 10
+declaration (37)
+    on left: 17, on right: 11
+listVars (38)
+    on left: 18 19 20 21, on right: 17 18 20
+expression (39)
+    on left: 22 23 24 25 26 27 28 29 30 31 32 33 34 35, on right: 12
+    13 14 15 16 20 21 22 23 24 25 26 27 28 29 30 31 36 37
+funcCallArgs (40)
+    on left: 36 37 38, on right: 32 36
+
+
+State 0
+
+    0 $accept: . program $end
+
+    intTypeToken     shift, and go to state 1
+    doubleTypeToken  shift, and go to state 2
+
+    program       go to state 3
+    mainFunction  go to state 4
+    type          go to state 5
+
+
+State 1
+
+    4 type: intTypeToken .
+
+    $default  reduce using rule 4 (type)
+
+
+State 2
+
+    5 type: doubleTypeToken .
+
+    $default  reduce using rule 5 (type)
+
+
+State 3
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 6
+
+
+State 4
+
+    1 program: mainFunction .
+
+    $default  reduce using rule 1 (program)
+
+
+State 5
+
+    2 mainFunction: type . mainToken '(' funcParameters ')' block
+    3             | type . mainToken '(' ')' block
+
+    mainToken  shift, and go to state 7
+
+
+State 6
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 7
+
+    2 mainFunction: type mainToken . '(' funcParameters ')' block
+    3             | type mainToken . '(' ')' block
+
+    '('  shift, and go to state 8
+
+
+State 8
+
+    2 mainFunction: type mainToken '(' . funcParameters ')' block
+    3             | type mainToken '(' . ')' block
+
+    intTypeToken     shift, and go to state 1
+    doubleTypeToken  shift, and go to state 2
+    ')'              shift, and go to state 9
+
+    type            go to state 10
+    funcParameters  go to state 11
+
+
+State 9
+
+    3 mainFunction: type mainToken '(' ')' . block
+
+    '{'  shift, and go to state 12
+
+    block  go to state 13
+
+
+State 10
+
+    7 funcParameters: type . idToken
+
+    idToken  shift, and go to state 14
+
+
+State 11
+
+    2 mainFunction: type mainToken '(' funcParameters . ')' block
+    6 funcParameters: funcParameters . ',' type idToken
+
+    ')'  shift, and go to state 15
+    ','  shift, and go to state 16
+
+
+State 12
+
+    8 block: '{' . statements '}'
+
+    intTypeToken     shift, and go to state 1
+    doubleTypeToken  shift, and go to state 2
+    returnToken      shift, and go to state 17
+    ifToken          shift, and go to state 18
+    idToken          shift, and go to state 19
+    intToken         shift, and go to state 20
+    doubleToken      shift, and go to state 21
+
+    type         go to state 22
+    statements   go to state 23
+    statement    go to state 24
+    declaration  go to state 25
+    expression   go to state 26
+
+
+State 13
+
+    3 mainFunction: type mainToken '(' ')' block .
+
+    $default  reduce using rule 3 (mainFunction)
+
+
+State 14
+
+    7 funcParameters: type idToken .
+
+    $default  reduce using rule 7 (funcParameters)
+
+
+State 15
+
+    2 mainFunction: type mainToken '(' funcParameters ')' . block
+
+    '{'  shift, and go to state 12
+
+    block  go to state 27
+
+
+State 16
+
+    6 funcParameters: funcParameters ',' . type idToken
+
+    intTypeToken     shift, and go to state 1
+    doubleTypeToken  shift, and go to state 2
+
+    type  go to state 28
+
+
+State 17
+
+   14 statement: returnToken . expression ';'
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 30
+
+
+State 18
+
+   15 statement: ifToken . '(' expression ')' block
+   16          | ifToken . '(' expression ')' block elseToken block
+
+    '('  shift, and go to state 31
+
+
+State 19
+
+   12 statement: idToken . '=' expression ';'
+   32 expression: idToken . '(' funcCallArgs ')'
+   33           | idToken .
+
+    '('  shift, and go to state 32
+    '='  shift, and go to state 33
+
+    $default  reduce using rule 33 (expression)
+
+
+State 20
+
+   34 expression: intToken .
+
+    $default  reduce using rule 34 (expression)
+
+
+State 21
+
+   35 expression: doubleToken .
+
+    $default  reduce using rule 35 (expression)
+
+
+State 22
+
+   17 declaration: type . listVars
+
+    idToken  shift, and go to state 34
+
+    listVars  go to state 35
+
+
+State 23
+
+    8 block: '{' statements . '}'
+    9 statements: statements . statement
+
+    intTypeToken     shift, and go to state 1
+    doubleTypeToken  shift, and go to state 2
+    returnToken      shift, and go to state 17
+    ifToken          shift, and go to state 18
+    idToken          shift, and go to state 19
+    intToken         shift, and go to state 20
+    doubleToken      shift, and go to state 21
+    '}'              shift, and go to state 36
+
+    type         go to state 22
+    statement    go to state 37
+    declaration  go to state 25
+    expression   go to state 26
+
+
+State 24
+
+   10 statements: statement .
+
+    $default  reduce using rule 10 (statements)
+
+
+State 25
+
+   11 statement: declaration . ';'
+
+    ';'  shift, and go to state 38
+
+
+State 26
+
+   13 statement: expression . ';'
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+    ';'        shift, and go to state 49
+
+
+State 27
+
+    2 mainFunction: type mainToken '(' funcParameters ')' block .
+
+    $default  reduce using rule 2 (mainFunction)
+
+
+State 28
+
+    6 funcParameters: funcParameters ',' type . idToken
+
+    idToken  shift, and go to state 50
+
+
+State 29
+
+   32 expression: idToken . '(' funcCallArgs ')'
+   33           | idToken .
+
+    '('  shift, and go to state 32
+
+    $default  reduce using rule 33 (expression)
+
+
+State 30
+
+   14 statement: returnToken expression . ';'
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+    ';'        shift, and go to state 51
+
+
+State 31
+
+   15 statement: ifToken '(' . expression ')' block
+   16          | ifToken '(' . expression ')' block elseToken block
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 52
+
+
+State 32
+
+   32 expression: idToken '(' . funcCallArgs ')'
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    $default  reduce using rule 38 (funcCallArgs)
+
+    expression    go to state 53
+    funcCallArgs  go to state 54
+
+
+State 33
+
+   12 statement: idToken '=' . expression ';'
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 55
+
+
+State 34
+
+   19 listVars: idToken .
+   21         | idToken . '=' expression
+
+    '='  shift, and go to state 56
+
+    $default  reduce using rule 19 (listVars)
+
+
+State 35
+
+   17 declaration: type listVars .
+   18 listVars: listVars . ',' idToken
+   20         | listVars . ',' idToken '=' expression
+
+    ','  shift, and go to state 57
+
+    $default  reduce using rule 17 (declaration)
+
+
+State 36
+
+    8 block: '{' statements '}' .
+
+    $default  reduce using rule 8 (block)
+
+
+State 37
+
+    9 statements: statements statement .
+
+    $default  reduce using rule 9 (statements)
+
+
+State 38
+
+   11 statement: declaration ';' .
+
+    $default  reduce using rule 11 (statement)
+
+
+State 39
+
+   28 expression: expression gteqToken . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 58
+
+
+State 40
+
+   29 expression: expression lteqToken . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 59
+
+
+State 41
+
+   30 expression: expression eqToken . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 60
+
+
+State 42
+
+   31 expression: expression neqToken . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 61
+
+
+State 43
+
+   26 expression: expression '>' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 62
+
+
+State 44
+
+   27 expression: expression '<' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 63
+
+
+State 45
+
+   22 expression: expression '+' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 64
+
+
+State 46
+
+   23 expression: expression '-' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 65
+
+
+State 47
+
+   24 expression: expression '*' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 66
+
+
+State 48
+
+   25 expression: expression '/' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 67
+
+
+State 49
+
+   13 statement: expression ';' .
+
+    $default  reduce using rule 13 (statement)
+
+
+State 50
+
+    6 funcParameters: funcParameters ',' type idToken .
+
+    $default  reduce using rule 6 (funcParameters)
+
+
+State 51
+
+   14 statement: returnToken expression ';' .
+
+    $default  reduce using rule 14 (statement)
+
+
+State 52
+
+   15 statement: ifToken '(' expression . ')' block
+   16          | ifToken '(' expression . ')' block elseToken block
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+    ')'        shift, and go to state 68
+
+
+State 53
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+   37 funcCallArgs: expression .
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+
+    $default  reduce using rule 37 (funcCallArgs)
+
+
+State 54
+
+   32 expression: idToken '(' funcCallArgs . ')'
+   36 funcCallArgs: funcCallArgs . ',' expression
+
+    ')'  shift, and go to state 69
+    ','  shift, and go to state 70
+
+
+State 55
+
+   12 statement: idToken '=' expression . ';'
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+    ';'        shift, and go to state 71
+
+
+State 56
+
+   21 listVars: idToken '=' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 72
+
+
+State 57
+
+   18 listVars: listVars ',' . idToken
+   20         | listVars ',' . idToken '=' expression
+
+    idToken  shift, and go to state 73
+
+
+State 58
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   28           | expression gteqToken expression .
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 28 (expression)
+
+
+State 59
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   29           | expression lteqToken expression .
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 29 (expression)
+
+
+State 60
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   30           | expression eqToken expression .
+   31           | expression . neqToken expression
+
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 30 (expression)
+
+
+State 61
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+   31           | expression neqToken expression .
+
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 31 (expression)
+
+
+State 62
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   26           | expression '>' expression .
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 26 (expression)
+
+
+State 63
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   27           | expression '<' expression .
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    '+'  shift, and go to state 45
+    '-'  shift, and go to state 46
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 27 (expression)
+
+
+State 64
+
+   22 expression: expression . '+' expression
+   22           | expression '+' expression .
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 22 (expression)
+
+
+State 65
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   23           | expression '-' expression .
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    '*'  shift, and go to state 47
+    '/'  shift, and go to state 48
+
+    $default  reduce using rule 23 (expression)
+
+
+State 66
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   24           | expression '*' expression .
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    $default  reduce using rule 24 (expression)
+
+
+State 67
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   25           | expression '/' expression .
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    $default  reduce using rule 25 (expression)
+
+
+State 68
+
+   15 statement: ifToken '(' expression ')' . block
+   16          | ifToken '(' expression ')' . block elseToken block
+
+    '{'  shift, and go to state 12
+
+    block  go to state 74
+
+
+State 69
+
+   32 expression: idToken '(' funcCallArgs ')' .
+
+    $default  reduce using rule 32 (expression)
+
+
+State 70
+
+   36 funcCallArgs: funcCallArgs ',' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 75
+
+
+State 71
+
+   12 statement: idToken '=' expression ';' .
+
+    $default  reduce using rule 12 (statement)
+
+
+State 72
+
+   21 listVars: idToken '=' expression .
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+
+    $default  reduce using rule 21 (listVars)
+
+
+State 73
+
+   18 listVars: listVars ',' idToken .
+   20         | listVars ',' idToken . '=' expression
+
+    '='  shift, and go to state 76
+
+    $default  reduce using rule 18 (listVars)
+
+
+State 74
+
+   15 statement: ifToken '(' expression ')' block .
+   16          | ifToken '(' expression ')' block . elseToken block
+
+    elseToken  shift, and go to state 77
+
+    $default  reduce using rule 15 (statement)
+
+
+State 75
+
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+   36 funcCallArgs: funcCallArgs ',' expression .
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+
+    $default  reduce using rule 36 (funcCallArgs)
+
+
+State 76
+
+   20 listVars: listVars ',' idToken '=' . expression
+
+    idToken      shift, and go to state 29
+    intToken     shift, and go to state 20
+    doubleToken  shift, and go to state 21
+
+    expression  go to state 78
+
+
+State 77
+
+   16 statement: ifToken '(' expression ')' block elseToken . block
+
+    '{'  shift, and go to state 12
+
+    block  go to state 79
+
+
+State 78
+
+   20 listVars: listVars ',' idToken '=' expression .
+   22 expression: expression . '+' expression
+   23           | expression . '-' expression
+   24           | expression . '*' expression
+   25           | expression . '/' expression
+   26           | expression . '>' expression
+   27           | expression . '<' expression
+   28           | expression . gteqToken expression
+   29           | expression . lteqToken expression
+   30           | expression . eqToken expression
+   31           | expression . neqToken expression
+
+    gteqToken  shift, and go to state 39
+    lteqToken  shift, and go to state 40
+    eqToken    shift, and go to state 41
+    neqToken   shift, and go to state 42
+    '>'        shift, and go to state 43
+    '<'        shift, and go to state 44
+    '+'        shift, and go to state 45
+    '-'        shift, and go to state 46
+    '*'        shift, and go to state 47
+    '/'        shift, and go to state 48
+
+    $default  reduce using rule 20 (listVars)
+
+
+State 79
+
+   16 statement: ifToken '(' expression ')' block elseToken block .
+
+    $default  reduce using rule 16 (statement)

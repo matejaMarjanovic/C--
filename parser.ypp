@@ -16,6 +16,7 @@
     int i;
     double d;
     string* s;
+    ExprAST* e;
 }
 
 %token intTypeToken doubleTypeToken mainToken returnToken ifToken elseToken
@@ -29,6 +30,12 @@
 %left '+' '-'
 %left '*' '/'
 
+%type <e> expression
+%type <b> block
+%type <vecSt> statements
+%type <st> statement declaration
+%type <vecAss> listVars
+
 %%
 
 program
@@ -39,20 +46,16 @@ program
 
 mainFunction
     : type mainToken '(' funcParameters ')' block {
-    
+        $6->codegen();
     }
     | type mainToken '(' ')' block {
-    
+        $5->codegen();
     }
     ;
     
 type
-    : intTypeToken {
-    
-    }
-    | doubleTypeToken {
-    
-    }
+    : intTypeToken
+    | doubleTypeToken
     ;
     
 funcParameters
@@ -66,103 +69,116 @@ funcParameters
 
 block
     : '{' statements '}' {
-    
+        $$ = new Block($1);
     }
     ;
     
 statements
     : statements statement {
-    
+        $$ = $1;
+        $$->push_back($2);
     }
     | statement {
-    
+        $$ = new vector<Statement*>();
+        $$->push_back($1);
     }
     ;
     
 statement
     : declaration ';' {
-    
+        $$ = $1;
     }
     | idToken '=' expression ';' {
-    
+        $$ = new AssignementStatement(*$1, $3);
+        delete $1;
     }
     | expression ';' {
-    
+        $$ = new ExpressionStatement($1);
     }
     | returnToken expression ';' {
-    
+        $$ = new ReturnStatement($2);
     }
     | ifToken '(' expression ')' block {
-    
+        $$ = new IfElseStatement($3, $5, nullptr);
     }
     | ifToken '(' expression ')' block elseToken block {
-    
+        $$ = new IfElseStatement($3, $5, $7);
     }
     ;
 
 declaration
     : type listVars {
-    
+        $$ = new DeclarationStatement($1, $2);
     }
     ;
     
 listVars
     : listVars ',' idToken {
-    
+        $$ = $1;
+        $$->push_back(new AssignementStatement(*$3, nullptr));
+        delete $3;
     }
     | idToken {
-    
+        $$ = new vector<AssignementStatement*>();
+        $$->push_back(new AssignementStatement(*$1, nullptr));
+        delete $1;
     }
     | listVars ',' idToken '=' expression {
-    
+        $$ = $1;
+        $$->push_back(new AssignementStatement(*$3, $5));
+        delete $3;
     }
     | idToken '=' expression {
-    
+        $$ = new vector<AssignementStatement*>();
+        $$->push_back(new AssignementStatement(*$1, $3));
+        delete $1;
     }
     ;
     
 expression
     : expression '+' expression {
-    
+        $$ = new BinOpExprAST($1, $3, Plus);
     }
     | expression '-' expression {
-    
+        $$ = new BinOpExprAST($1, $3, Minus);
     }
     | expression '*' expression {
-    
+        $$ = new BinOpExprAST($1, $3, Asterisk);
     }
     | expression '/' expression {
-    
+        $$ = new BinOpExprAST($1, $3, Slash);
     }
     | expression '>' expression {
-    
+        $$ = new BinOpExprAST($1, $3, Greater);
     }
     | expression '<' expression {
-    
+        $$ = new BinOpExprAST($1, $3, Less);
     }
     | expression gteqToken expression {
-    
+        $$ = new BinOpExprAST($1, $3, GreaterEq);
     }
     | expression lteqToken expression {
-    
+        $$ = new BinOpExprAST($1, $3, LessEq);
     }
     | expression eqToken expression {
-    
+        $$ = new BinOpExprAST($1, $3, Equal);
     }
     | expression neqToken expression {
-    
+        $$ = new BinOpExprAST($1, $3, NotEqual);
     }
     | idToken '(' funcCallArgs ')' {
-    
+/*         $$ = FuncCallExprAST($*1, $3); */
+        delete $1;
     }
     | idToken {
-    
+        $$ = new VariableExprAST(*$1);
+        delete $1;
     }
     | intToken {
-    
+        $$ = new NumericExprAST($1, Int);
     }
     | doubleToken {
-    
+        $$ = new NumericExprAST($1, Double);
     }
     ;
     
@@ -180,9 +196,13 @@ funcCallArgs
     
 %%
 
-int main() {
+extern LLVMContext TheContext;
+extern Module* TheModule;
+
+int main(int argc, char** argv) {
+    initializeModuleAndPassManager();
     yyparse();
+    TheModule->dump();
+    delete TheModule;
     return 0;
 }
-
-
