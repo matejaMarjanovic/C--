@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <utility>
 #include <map>
+#include <stack>
 using namespace std;
 
 #include "llvm/IR/Module.h"

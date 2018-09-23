@@ -41,12 +41,16 @@ public:
     ExprAST* rhs() const {
         return m_rhs;
     }
+    void setType(Types a) {
+        m_type = a;
+    }
     ~AssignementStatAST() {
         delete m_rhs;
     }
 private:  
     string m_lhs;
     ExprAST* m_rhs;
+    Types m_type;
 };
 
 class ListVarsStatAST : public StatAST {
@@ -147,4 +151,4 @@ private:
     vector<StatAST*> m_stats;
 };
 
-
+AllocaInst *CreateEntryBlockAlloca(Function *TheFunction, const string &VarName);

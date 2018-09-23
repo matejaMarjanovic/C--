@@ -1,7 +1,7 @@
 #include "expression.hpp"
 
 LLVMContext TheContext;
-map<string, pair<Value*, Types>> namedValues;
+map<string, pair<AllocaInst*, Types>> namedValues;
 IRBuilder<> Builder(TheContext);
 Module* TheModule;
 legacy::FunctionPassManager* TheFPM;
@@ -93,17 +93,23 @@ Types BinOpExprAST::type() {
 }
 
 Value* VariableExprAST::codegen() const {
-    pair<Value*, Types>* a = new pair<Value*, Types>(namedValues[m_name]);
-    if(a == nullptr) {
-        cerr << "Promenljiva " << m_name << " nije definisana" << endl;
+    AllocaInst* tmp = namedValues[m_name].first;
+    if (tmp == nullptr) {
+        cerr << "Promenljiva " + m_name + " nije definisana" << endl;
+        return nullptr;
     }
-    return a->first;
+    if(namedValues[m_name].second == Double) {
+        return Builder.CreateLoad(Type::getDoubleTy(TheContext), tmp, m_name.c_str());
+    } else if(namedValues[m_name].second == Int) {
+        return Builder.CreateLoad(Type::getInt32Ty(TheContext), tmp, m_name.c_str());
+    }
+    return nullptr;
 }
 
 Types VariableExprAST::type() {
-    pair<Value*, Types>* a = new pair<Value*, Types>(namedValues[m_name]);
+    pair<AllocaInst*, Types>* a = new pair<AllocaInst*, Types>(namedValues[m_name]);
     if(a == nullptr) {
-        cerr << "Promenljiva " << m_name << " nije definisana" << endl;
+        cerr << "Promenljiva " << m_name << " nije definisana pusi kurac" << endl;
     }
     return a->second;
 }

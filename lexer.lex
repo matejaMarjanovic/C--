@@ -6,11 +6,13 @@
     #include <string>
     #include <cstdlib>
     #include <vector>
+    #include <utility>
     
     using namespace std;
     
     #include "expression.hpp"
     #include "statements.hpp"
+    #include "function.hpp"
     #include "parser.tab.hpp"
 
     
@@ -23,7 +25,10 @@
 %%
 
 return                      return returnToken;
-main                        return mainToken;
+main {
+    yylval.s = new string(yytext);
+    return mainToken;
+}
 double                      return doubleTypeToken;
 int                         return intTypeToken;
 if                          return ifToken;
