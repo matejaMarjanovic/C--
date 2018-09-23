@@ -1,4 +1,4 @@
-#include "ast.hpp"
+#include "expression.hpp"
 
 LLVMContext TheContext;
 map<string, pair<Value*, Types>> namedValues;
@@ -81,9 +81,9 @@ Value* BinOpExprAST::codegen() const {
     }
 }
 
-Types BinOpExprAST::getType() {
-    Types lhsType = m_lhs->getType();
-    Types rhsType = m_rhs->getType();
+Types BinOpExprAST::type() {
+    Types lhsType = m_lhs->type();
+    Types rhsType = m_rhs->type();
     if(lhsType == rhsType) {
         m_type = lhsType;
     } else if (lhsType == Double || rhsType == Double) {
@@ -100,7 +100,7 @@ Value* VariableExprAST::codegen() const {
     return a->first;
 }
 
-Types VariableExprAST::getType() {
+Types VariableExprAST::type() {
     pair<Value*, Types>* a = new pair<Value*, Types>(namedValues[m_name]);
     if(a == nullptr) {
         cerr << "Promenljiva " << m_name << " nije definisana" << endl;
@@ -117,7 +117,7 @@ Value* NumericExprAST::codegen() const {
     }
 }
 
-Types NumericExprAST::getType() {
+Types NumericExprAST::type() {
     return m_type;
 }
 

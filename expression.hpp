@@ -40,7 +40,7 @@ public:
     virtual ~ExprAST() {
         
     }
-    virtual Types getType() = 0;
+    virtual Types type() = 0;
 protected:
     Types m_type;
 };
@@ -51,9 +51,9 @@ public:
         :m_lhs{lhs},
          m_rhs{rhs},
          m_op{op} {
-        m_type = getType();
+        m_type = type();
     }
-    Types getType();
+    Types type();
     Value* codegen() const;
     ~BinOpExprAST() {
         delete m_lhs;
@@ -71,7 +71,7 @@ public:
         :m_name{name} {
             
     }
-    Types getType();
+    Types type();
     Value* codegen() const;
 private:
     string m_name;
@@ -87,7 +87,7 @@ public:
         :m_doubleVal{doubleVal} {
         m_type = type;
     }
-    Types getType();
+    Types type();
     Value* codegen() const;
 private:
     int m_intVal;
@@ -101,7 +101,7 @@ private:
 //          m_args{args} {
 //              
 //     }
-//     void getType() const;
+//     void type() const;
 //     Value* codegen() const;
 //     ~FuncCallExprAST() {
 //         for(auto &e : m_args) {

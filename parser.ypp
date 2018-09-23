@@ -4,7 +4,8 @@
     #include <cstdlib>
     #include <string>
     #include <vector>
-    #include "ast.hpp"
+    #include "expression.hpp"
+    #include "statements.hpp"
     using namespace std;
 
     extern void yyerror(const string &msg);
@@ -17,6 +18,11 @@
     double d;
     string* s;
     ExprAST* e;
+    StatAST* st;
+    vector<StatAST*>* vecSt;
+    vector<AssignementStatAST*>* vecAsg;
+    BlockStatAST* b;
+    Types t;
 }
 
 %token intTypeToken doubleTypeToken mainToken returnToken ifToken elseToken
@@ -26,15 +32,21 @@
 %token <d> doubleToken
 
 
-%left '>' '<' lteqToken gteqToken eqToken neqToken
+%left ';'
+%left ','
+%right '='
+%left eqToken neqToken
+%left '>' '<' lteqToken gteqToken 
+%left elseToken
 %left '+' '-'
 %left '*' '/'
 
 %type <e> expression
 %type <b> block
 %type <vecSt> statements
+%type <vecAsg> listVars
 %type <st> statement declaration
-%type <vecAss> listVars
+%type <t> type
 
 %%
 
@@ -54,8 +66,12 @@ mainFunction
     ;
     
 type
-    : intTypeToken
-    | doubleTypeToken
+    : intTypeToken {
+        $$ = Int;
+    }
+    | doubleTypeToken {
+        $$ = Double;
+    }
     ;
     
 funcParameters
@@ -69,7 +85,8 @@ funcParameters
 
 block
     : '{' statements '}' {
-        $$ = new Block($1);
+        $$ = new BlockStatAST(*$2);
+        delete $2;
     }
     ;
     
@@ -79,7 +96,7 @@ statements
         $$->push_back($2);
     }
     | statement {
-        $$ = new vector<Statement*>();
+        $$ = new vector<StatAST*>();
         $$->push_back($1);
     }
     ;
@@ -88,49 +105,68 @@ statement
     : declaration ';' {
         $$ = $1;
     }
+    | listVars {
+        $$ = new ListVarsStatAST(*$1);
+        delete $1;
+    }
     | idToken '=' expression ';' {
-        $$ = new AssignementStatement(*$1, $3);
+        $$ = new AssignementStatAST(*$1, $3);
         delete $1;
     }
     | expression ';' {
-        $$ = new ExpressionStatement($1);
+        $$ = new ExpressionStatAST($1);
     }
     | returnToken expression ';' {
-        $$ = new ReturnStatement($2);
+        $$ = new ReturnStatAST($2);
     }
     | ifToken '(' expression ')' block {
-        $$ = new IfElseStatement($3, $5, nullptr);
+        $$ = new IfElseStatAST($3, $5, nullptr);
     }
     | ifToken '(' expression ')' block elseToken block {
-        $$ = new IfElseStatement($3, $5, $7);
+        $$ = new IfElseStatAST($3, $5, $7);
     }
     ;
 
 declaration
     : type listVars {
-        $$ = new DeclarationStatement($1, $2);
+        $$ = new DeclarationStatAST($1, *$2);
+        delete $2;
     }
     ;
     
 listVars
     : listVars ',' idToken {
         $$ = $1;
-        $$->push_back(new AssignementStatement(*$3, nullptr));
+        auto e = new AssignementStatAST(*$3, nullptr);
+        $$->push_back(e);
         delete $3;
     }
     | idToken {
-        $$ = new vector<AssignementStatement*>();
-        $$->push_back(new AssignementStatement(*$1, nullptr));
+        $$ = new vector<AssignementStatAST*>();
+        auto e = new AssignementStatAST(*$1, nullptr);
+        $$->push_back(e);
         delete $1;
+    }
+    | expression {
+        $$ = new vector<AssignementStatAST*>();
+        auto e = new AssignementStatAST(string(), $1);
+        $$->push_back(e);
+    }
+    | listVars ',' expression {
+        $$ = $1;
+        auto e = new AssignementStatAST(string(), $3);
+        $$->push_back(e);
     }
     | listVars ',' idToken '=' expression {
         $$ = $1;
-        $$->push_back(new AssignementStatement(*$3, $5));
+        auto e = new AssignementStatAST(*$3, $5);
+        $$->push_back(e);
         delete $3;
     }
     | idToken '=' expression {
-        $$ = new vector<AssignementStatement*>();
-        $$->push_back(new AssignementStatement(*$1, $3));
+        $$ = new vector<AssignementStatAST*>();
+        auto e = new AssignementStatAST(*$1, $3);
+        $$->push_back(e);
         delete $1;
     }
     ;

@@ -487,7 +487,8 @@ char *yytext;
     
     using namespace std;
     
-    #include "ast.hpp"
+    #include "expression.hpp"
+    #include "statements.hpp"
     #include "parser.tab.hpp"
 
     
@@ -495,7 +496,7 @@ char *yytext;
         cerr << msg << endl;    
         exit(EXIT_FAILURE);
     }
-#line 499 "lex.yy.c"
+#line 500 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -711,10 +712,10 @@ YY_DECL
 		}
 
 	{
-#line 22 "lexer.lex"
+#line 23 "lexer.lex"
 
 
-#line 718 "lex.yy.c"
+#line 719 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -773,62 +774,62 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 24 "lexer.lex"
+#line 25 "lexer.lex"
 return returnToken;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 25 "lexer.lex"
+#line 26 "lexer.lex"
 return mainToken;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 26 "lexer.lex"
+#line 27 "lexer.lex"
 return doubleTypeToken;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 27 "lexer.lex"
+#line 28 "lexer.lex"
 return intTypeToken;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 28 "lexer.lex"
+#line 29 "lexer.lex"
 return ifToken;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 29 "lexer.lex"
+#line 30 "lexer.lex"
 return elseToken;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 30 "lexer.lex"
+#line 31 "lexer.lex"
 return gteqToken;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 31 "lexer.lex"
+#line 32 "lexer.lex"
 return lteqToken;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 32 "lexer.lex"
+#line 33 "lexer.lex"
 return eqToken;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 33 "lexer.lex"
+#line 34 "lexer.lex"
 return neqToken;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 34 "lexer.lex"
+#line 35 "lexer.lex"
 return *yytext;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 35 "lexer.lex"
+#line 36 "lexer.lex"
 {
     yylval.i = atoi(yytext);
     return intToken;
@@ -836,7 +837,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 39 "lexer.lex"
+#line 40 "lexer.lex"
 {
     yylval.d = atof(yytext);
     return doubleToken;
@@ -844,7 +845,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 43 "lexer.lex"
+#line 44 "lexer.lex"
 {
     yylval.s = new string(yytext);
     return idToken;
@@ -853,15 +854,15 @@ YY_RULE_SETUP
 case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
-#line 47 "lexer.lex"
+#line 48 "lexer.lex"
 { }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 49 "lexer.lex"
+#line 50 "lexer.lex"
 ECHO;
 	YY_BREAK
-#line 865 "lex.yy.c"
+#line 866 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1825,7 +1826,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 49 "lexer.lex"
+#line 50 "lexer.lex"
 
 
 

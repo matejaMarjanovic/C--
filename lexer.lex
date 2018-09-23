@@ -9,7 +9,8 @@
     
     using namespace std;
     
-    #include "ast.hpp"
+    #include "expression.hpp"
+    #include "statements.hpp"
     #include "parser.tab.hpp"
 
     

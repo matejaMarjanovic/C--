@@ -66,14 +66,19 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 15 "parser.ypp" /* yacc.c:1909  */
+#line 16 "parser.ypp" /* yacc.c:1909  */
 
     int i;
     double d;
     string* s;
     ExprAST* e;
+    StatAST* st;
+    vector<StatAST*>* vecSt;
+    vector<AssignementStatAST*>* vecAsg;
+    BlockStatAST* b;
+    Types t;
 
-#line 77 "parser.tab.hpp" /* yacc.c:1909  */
+#line 82 "parser.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
