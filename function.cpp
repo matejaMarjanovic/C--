@@ -52,7 +52,7 @@ Function* FunctionAST::codegen() const {
     // Record the function arguments in the namedValues map.
     namedValues.clear();
     for (auto &Arg : TheFunction->args()) {
-        AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, Arg.getName());
+        AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, Arg.getName(), Int);
         namedValues[Arg.getName()] = pair<AllocaInst*, Types>(Alloca, Int);
         Builder.CreateStore(&Arg, Alloca);
     }

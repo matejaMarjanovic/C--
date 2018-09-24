@@ -6,7 +6,10 @@
 #include "llvm/IR/Verifier.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/Scalar.h"
-#include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Support/TargetRegistry.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Support/FileSystem.h"
 using namespace llvm;
 using namespace std;
 
@@ -151,4 +154,4 @@ private:
     vector<StatAST*> m_stats;
 };
 
-AllocaInst *CreateEntryBlockAlloca(Function *TheFunction, const string &VarName);
+AllocaInst *CreateEntryBlockAlloca(Function *TheFunction, const string &VarName, Types type);

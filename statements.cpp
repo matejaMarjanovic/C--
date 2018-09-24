@@ -7,8 +7,12 @@ extern Module* TheModule;
 extern legacy::FunctionPassManager* TheFPM;
 
 Value* AssignementStatAST::codegen() const {
+    if(m_type != m_rhs->type()) {
+        cerr << "Wrong type" << endl;
+        return nullptr;
+    }
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
-    AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, m_lhs);
+    AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, m_lhs, m_type);
     Value* Tmp = nullptr;
     if(namedValues.find(m_lhs) == namedValues.end()) {
         namedValues[m_lhs] = pair<AllocaInst*, Types>(Alloca, m_type);
@@ -25,8 +29,13 @@ Value* AssignementStatAST::codegen() const {
     if (Tmp == nullptr) {
         return nullptr;
     }
-    namedValues[m_lhs] = pair<AllocaInst*, Types>(Alloca, m_rhs->type());
-    Builder.CreateStore(Tmp, Alloca);
+    namedValues[m_lhs] = pair<AllocaInst*, Types>(Alloca, m_type);
+    if(namedValues[m_lhs].second == Double) {
+        Builder.CreateAlignedStore(Tmp, Alloca, 8);
+    } 
+    else if(namedValues[m_lhs].second == Int) {
+        Builder.CreateAlignedStore(Tmp, Alloca, 4);
+    }
     
     return namedValues[m_lhs].first;
 }
@@ -119,7 +128,11 @@ Value* BlockStatAST::codegen() const {
     return tmp;
 }
 
-AllocaInst *CreateEntryBlockAlloca(Function *TheFunction, const string &VarName) {
+AllocaInst *CreateEntryBlockAlloca(Function *TheFunction, const string &VarName, Types type) {
     IRBuilder<> TmpB(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
-    return TmpB.CreateAlloca(Type::getDoubleTy(TheContext), 0, VarName.c_str());
+    if(type == Double) {
+        return TmpB.CreateAlloca(Type::getDoubleTy(TheContext), 0, VarName.c_str());
+    } else if(type == Int) {
+        return TmpB.CreateAlloca(Type::getInt32Ty(TheContext), 0, VarName.c_str());
+    }
 }

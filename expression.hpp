@@ -15,6 +15,11 @@ using namespace std;
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Support/TargetRegistry.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Target.h"
+#include "llvm/Support/FileSystem.h"
 using namespace llvm;
 
 enum Operators {
@@ -95,23 +100,23 @@ private:
     double m_doubleVal;
 };
 
-// class FuncCallExprAST : public ExprAST {
-// public:
-//     FuncCallExprAST(const string &name, const vector<ExprAST*> &args)
-//         :m_name{name},
-//          m_args{args} {
-//              
-//     }
-//     void type() const;
-//     Value* codegen() const;
-//     ~FuncCallExprAST() {
-//         for(auto &e : m_args) {
-//             delete e;
-//         }
-//     }
-// private:
-//     string m_name;
-//     vector<ExprAST*> m_args;
-// };
+class FuncCallExprAST : public ExprAST {
+public:
+    FuncCallExprAST(const string &name, const vector<ExprAST*> &args)
+        :m_name{name},
+         m_args{args} {
+             
+    }
+    Types type();
+    Value* codegen() const;
+    ~FuncCallExprAST() {
+        for(auto &e : m_args) {
+            delete e;
+        }
+    }
+private:
+    string m_name;
+    vector<ExprAST*> m_args;
+};
 
 void initializeModuleAndPassManager();

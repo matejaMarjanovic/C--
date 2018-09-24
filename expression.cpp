@@ -103,7 +103,7 @@ Value* VariableExprAST::codegen() const {
     } else if(namedValues[m_name].second == Int) {
         return Builder.CreateLoad(Type::getInt32Ty(TheContext), tmp, m_name.c_str());
     }
-    return nullptr;
+//     return nullptr;
 }
 
 Types VariableExprAST::type() {
@@ -127,9 +127,33 @@ Types NumericExprAST::type() {
     return m_type;
 }
 
-// Value* FuncCallExprAST::codegen() const {
-    
-// }
+Value* FuncCallExprAST::codegen() const {
+    Function *CalleeF = TheModule->getFunction(m_name);
+    if (!CalleeF) {
+        cerr << "Fja " << m_name << " nije definisana" << endl;
+        return nullptr;
+    }
+
+    // If argument mismatch error.
+    if (CalleeF->arg_size() != m_args.size()) {
+        cout << "Fja " << m_name << " prima " << CalleeF->arg_size() << " argumenata" << endl;
+        return nullptr;
+    }
+
+    vector<Value*> ArgsV;
+    for (unsigned i = 0, e = m_args.size(); i != e; ++i) {
+        ArgsV.push_back(m_args[i]->codegen());
+        if (!ArgsV.back()) {
+            return nullptr;
+        }
+    }
+
+    return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
+}
+
+Types FuncCallExprAST::type() {
+    return TheModule->getFunction(m_name)->getReturnType() == Type::getDoubleTy(TheContext) ? Double : Int;
+}
 
 
 void initializeModuleAndPassManager() {
