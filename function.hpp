@@ -29,6 +29,9 @@ public:
     string name() const {
         return m_name;
     }
+    vector<pair<Types, string>> params() const {
+        return m_params;
+    }
 private:
     string m_name;
     vector<pair<Types, string>> m_params;

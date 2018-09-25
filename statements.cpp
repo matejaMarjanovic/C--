@@ -7,37 +7,46 @@ extern Module* TheModule;
 extern legacy::FunctionPassManager* TheFPM;
 
 Value* AssignementStatAST::codegen() const {
-    if(m_type != m_rhs->type()) {
-        cerr << "Wrong type" << endl;
-        return nullptr;
-    }
-    Function* TheFunction = Builder.GetInsertBlock()->getParent();
-    AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, m_lhs, m_type);
-    Value* Tmp = nullptr;
-    if(namedValues.find(m_lhs) == namedValues.end()) {
-        namedValues[m_lhs] = pair<AllocaInst*, Types>(Alloca, m_type);
-    }
-    if (m_rhs != nullptr) {
-        Tmp = m_rhs->codegen();
-    } else {
-        if(namedValues[m_lhs].second == Double) {
-            Tmp = ConstantFP::get(TheContext, APFloat(0.0));
-        } else if(namedValues[m_lhs].second == Int) {
-            Tmp = ConstantInt::get(Type::getInt32Ty(TheContext), 0, true);
+    Value* tmp = nullptr;
+    if(namedValues.find(m_lhs) != namedValues.end()) { 
+        if(namedValues[m_lhs].second != m_rhs->type()) {
+            cerr << "Wrong type" << endl;
+            return nullptr;
         }
+        tmp = m_rhs->codegen();
+        if(tmp == nullptr) {
+            return tmp;
+        }
+        AllocaInst* Alloca = namedValues[m_lhs].first;
+        Builder.CreateStore(tmp, Alloca);
+        return tmp;
     }
-    if (Tmp == nullptr) {
-        return nullptr;
+    else {
+        Function* TheFunction = Builder.GetInsertBlock()->getParent();
+        AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, m_lhs, m_type);
+        if (m_rhs != nullptr) {
+            tmp = m_rhs->codegen();
+        } else {
+            if(m_type == Double) {
+                tmp = ConstantFP::get(TheContext, APFloat(0.0));
+            } else if(m_type == Int) {
+                tmp = ConstantInt::get(Type::getInt32Ty(TheContext), 0, true);
+            }
+        }
+        if (tmp == nullptr) {
+            return nullptr;
+        }
+        
+        namedValues[m_lhs] = pair<AllocaInst*, Types>(Alloca, m_type);
+        if(namedValues[m_lhs].second == Double) {
+            Builder.CreateAlignedStore(tmp, Alloca, 8);
+        } 
+        else if(namedValues[m_lhs].second == Int) {
+            Builder.CreateAlignedStore(tmp, Alloca, 4);
+        }
+        
+        return tmp;
     }
-    namedValues[m_lhs] = pair<AllocaInst*, Types>(Alloca, m_type);
-    if(namedValues[m_lhs].second == Double) {
-        Builder.CreateAlignedStore(Tmp, Alloca, 8);
-    } 
-    else if(namedValues[m_lhs].second == Int) {
-        Builder.CreateAlignedStore(Tmp, Alloca, 4);
-    }
-    
-    return namedValues[m_lhs].first;
 }
 
 Value* ListVarsStatAST::codegen() const {
@@ -129,10 +138,10 @@ Value* BlockStatAST::codegen() const {
 }
 
 AllocaInst *CreateEntryBlockAlloca(Function *TheFunction, const string &VarName, Types type) {
-    IRBuilder<> TmpB(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
+    IRBuilder<> tmpB(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
     if(type == Double) {
-        return TmpB.CreateAlloca(Type::getDoubleTy(TheContext), 0, VarName.c_str());
+        return tmpB.CreateAlloca(Type::getDoubleTy(TheContext), 0, VarName.c_str());
     } else if(type == Int) {
-        return TmpB.CreateAlloca(Type::getInt32Ty(TheContext), 0, VarName.c_str());
+        return tmpB.CreateAlloca(Type::getInt32Ty(TheContext), 0, VarName.c_str());
     }
 }

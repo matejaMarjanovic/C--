@@ -196,9 +196,7 @@ listVars
         delete $3;
     }
     | idToken '=' expression {
-        $$ = new vector<AssignementStatAST*>();
-        auto e = new AssignementStatAST(*$1, $3);
-        $$->push_back(e);
+        $$ = new vector<AssignementStatAST*>{new AssignementStatAST(*$1, $3)};
         delete $1;
     }
     ;

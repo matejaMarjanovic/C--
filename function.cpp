@@ -50,17 +50,28 @@ Function* FunctionAST::codegen() const {
     Builder.SetInsertPoint(BB);
 
     // Record the function arguments in the namedValues map.
+    map<string, pair<AllocaInst*, Types>> tmpNamedValues(namedValues);
     namedValues.clear();
+    
+    vector<Types> Parameters;
+    for(auto e : m_proto.params()) {
+        Parameters.push_back(e.first);
+    }
+    
+    int i = 0;
     for (auto &Arg : TheFunction->args()) {
-        AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, Arg.getName(), Int);
-        namedValues[Arg.getName()] = pair<AllocaInst*, Types>(Alloca, Int);
+        AllocaInst* Alloca = CreateEntryBlockAlloca(TheFunction, Arg.getName(), Parameters[i]);
+        namedValues[Arg.getName()] = pair<AllocaInst*, Types>(Alloca, Parameters[i++]);
         Builder.CreateStore(&Arg, Alloca);
     }
     
     Value *RetVal = m_body->codegen();
     if(RetVal != nullptr) {
         verifyFunction(*TheFunction);
+        cout << "pusi kurac" << endl;
         TheFPM->run(*TheFunction);
+        namedValues.clear();
+        namedValues = tmpNamedValues;
         return TheFunction;
     }
     TheFunction->eraseFromParent();
