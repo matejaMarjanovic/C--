@@ -9,8 +9,12 @@
     #include "function.hpp"
     using namespace std;
     
-    extern void yyerror(const string &msg);
-    int yylex();
+    void yyerror(const string &msg) {
+        cerr << msg << endl;    
+        exit(EXIT_FAILURE);
+    }
+    
+    extern int yylex();
 
 %}
 
@@ -30,7 +34,7 @@
     vector<ExprAST*>* vecExpr;
 }
 
-%token intTypeToken doubleTypeToken returnToken ifToken elseToken
+%token intTypeToken doubleTypeToken returnToken ifToken elseToken whileToken
 %token gteqToken lteqToken eqToken neqToken
 %token <s> idToken mainToken
 %token <i> intToken
@@ -60,8 +64,12 @@
 %%
 
 program
-    : program functions
-    | functions
+    : program functions {
+
+    }
+    | functions {
+
+    }
     ;
 functions
     : mainFunction {
@@ -167,17 +175,24 @@ statement
     | returnToken expression ';' {
         $$ = new ReturnStatAST($2);
     }
+    | ifToken '(' expression ')' block elseToken block {
+        $$ = new IfElseStatAST($3, $5, $7);
+    }
     | ifToken '(' expression ')' block {
         $$ = new IfElseStatAST($3, $5, nullptr);
     }
-    | ifToken '(' expression ')' block elseToken block {
-        $$ = new IfElseStatAST($3, $5, $7);
+    | whileToken '(' expression')' block {
+        $$ = new WhileStatAST($3, $5);
     }
     ;
 
 declaration
     : type listVars {
         $$ = new DeclarationStatAST($1, *$2);
+        delete $2;
+    }
+    | type idToken {
+        $$ = new DeclarationStatAST($1, vector<AssignementStatAST*>{new AssignementStatAST(*$2, nullptr)});
         delete $2;
     }
     ;
@@ -266,6 +281,7 @@ funcCallArgs
 
 extern LLVMContext TheContext;
 extern Module* TheModule;
+extern bool error;
 
 int main(int argc, char** argv) {
 /*    initializeModuleAndPassManager();
@@ -278,56 +294,58 @@ int main(int argc, char** argv) {
     //yydebug = 1;
     initializeModuleAndPassManager();
     yyparse();
-    TheModule->dump();
+    if(!error) {
+        TheModule->dump();
 
-    string TargetTriple = "x86_64-pc-linux-gnu";
+        string TargetTriple = "x86_64-pc-linux-gnu";
 
-    LLVMInitializeAllTargetInfos();
-    LLVMInitializeAllTargets();
-    LLVMInitializeAllTargetMCs();
-    LLVMInitializeAllAsmParsers();
-    LLVMInitializeAllAsmPrinters();
+        LLVMInitializeAllTargetInfos();
+        LLVMInitializeAllTargets();
+        LLVMInitializeAllTargetMCs();
+        LLVMInitializeAllAsmParsers();
+        LLVMInitializeAllAsmPrinters();
 
-    string Error;
-    auto Target = TargetRegistry::lookupTarget(TargetTriple, Error);
-    
-    // Print an error and exit if we couldn't find the requested target.
-    // This generally occurs if we've forgotten to initialise the
-    // TargetRegistry or we have a bogus target triple.
-    if (!Target) {
-        cerr << Error;
-        return 1;
+        string Error;
+        auto Target = TargetRegistry::lookupTarget(TargetTriple, Error);
+        
+        // Print an error and exit if we couldn't find the requested target.
+        // This generally occurs if we've forgotten to initialise the
+        // TargetRegistry or we have a bogus target triple.
+        if (!Target) {
+            cerr << Error;
+            return 1;
+        }
+
+        auto CPU = "generic";
+        auto Features = "";
+        
+        TargetOptions opt;
+        auto RM = Reloc::Model();
+        auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
+
+        TheModule->setDataLayout(TargetMachine->createDataLayout());
+        TheModule->setTargetTriple(TargetTriple);
+
+        string Filename = "output.o";
+        error_code EC;
+        raw_fd_ostream dest(Filename, EC, sys::fs::F_None);
+        
+        if (EC) {
+            cerr << "Could not open file: " << EC.message();
+            return 1;
+        }
+
+        legacy::PassManager pass;
+        auto FileType = TargetMachine::CGFT_ObjectFile;
+        
+        if (TargetMachine->addPassesToEmitFile(pass, dest, FileType)) {
+            cerr << "TargetMachine can't emit a file of this type";
+            return 1;
+        }
+        
+        pass.run(*TheModule);
+        dest.flush();
     }
-
-    auto CPU = "generic";
-    auto Features = "";
-    
-    TargetOptions opt;
-    auto RM = Reloc::Model();
-    auto TargetMachine = Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
-
-    TheModule->setDataLayout(TargetMachine->createDataLayout());
-    TheModule->setTargetTriple(TargetTriple);
-
-    string Filename = "output.o";
-    error_code EC;
-    raw_fd_ostream dest(Filename, EC, sys::fs::F_None);
-    
-    if (EC) {
-        cerr << "Could not open file: " << EC.message();
-        return 1;
-    }
-
-    legacy::PassManager pass;
-    auto FileType = TargetMachine::CGFT_ObjectFile;
-    
-    if (TargetMachine->addPassesToEmitFile(pass, dest, FileType)) {
-        cerr << "TargetMachine can't emit a file of this type";
-        return 1;
-    }
-    
-    pass.run(*TheModule);
-    dest.flush();
     
     delete TheModule;
     return 0;

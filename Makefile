@@ -1,5 +1,5 @@
-CC=g++
-CFLAGS=$(shell llvm-config-4.0 --cxxflags)
+CC=clang++
+CFLAGS=$(shell llvm-config-4.0 --cxxflags) -Wno-return-type
 LDFLAGS=$(shell llvm-config-4.0 --ldflags --system-libs --libs)
 
 executable: lex.yy.o parser.tab.o expression.o statements.o function.o

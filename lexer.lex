@@ -16,10 +16,7 @@
     #include "parser.tab.hpp"
 
     
-    void yyerror(const string &msg) {
-        cerr << msg << endl;    
-        exit(EXIT_FAILURE);
-    }
+    extern void yyerror(const string &msg);
 %}
 
 %%
@@ -33,6 +30,7 @@ double                      return doubleTypeToken;
 int                         return intTypeToken;
 if                          return ifToken;
 else                        return elseToken;
+while                       return whileToken;
 ">="                        return gteqToken;
 "<="                        return lteqToken;
 "=="                        return eqToken;

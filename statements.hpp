@@ -118,6 +118,22 @@ private:
     ExprAST* m_retExpr;
 };
 
+class BlockStatAST : public StatAST {
+public:
+    BlockStatAST(vector<StatAST*> a)
+        :m_stats{a} {
+            
+    }
+    Value* codegen() const;
+    ~BlockStatAST() {
+        for(auto &e : m_stats) {
+            delete e;
+        }
+    }
+private:
+    vector<StatAST*> m_stats;
+};
+
 class IfElseStatAST : public StatAST {
 public:
     IfElseStatAST(ExprAST* a, BlockStatAST* b, BlockStatAST* c)
@@ -138,20 +154,21 @@ private:
     BlockStatAST* m_else;
 };
 
-class BlockStatAST : public StatAST {
+class WhileStatAST : public StatAST {
 public:
-    BlockStatAST(vector<StatAST*> a)
-        :m_stats{a} {
-            
+    WhileStatAST(ExprAST* a, BlockStatAST* b)
+        :m_cond{a},
+         m_body{b} {
+             
     }
     Value* codegen() const;
-    ~BlockStatAST() {
-        for(auto &e : m_stats) {
-            delete e;
-        }
+    ~WhileStatAST() {
+        delete m_cond;
+        delete m_body;
     }
 private:
-    vector<StatAST*> m_stats;
+    ExprAST* m_cond;
+    BlockStatAST* m_body;
 };
 
 AllocaInst *CreateEntryBlockAlloca(Function *TheFunction, const string &VarName, Types type);

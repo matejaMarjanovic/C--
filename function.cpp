@@ -5,6 +5,7 @@ extern map<string, pair<AllocaInst*, Types>> namedValues;
 extern IRBuilder<> Builder;
 extern Module* TheModule;
 extern legacy::FunctionPassManager* TheFPM;
+extern bool error;
 
 Function* PrototypeAST::codegen() const {
     vector<Type*> Parameters;
@@ -15,7 +16,7 @@ Function* PrototypeAST::codegen() const {
             Parameters.push_back(Type::getInt32Ty(TheContext));
         }
     }
-    FunctionType *FT;
+    FunctionType *FT = nullptr;
     if(m_type == Double) {
         FT = FunctionType::get(Type::getDoubleTy(TheContext), Parameters, false);
     } else if(m_type == Int) {
@@ -34,14 +35,17 @@ Function* PrototypeAST::codegen() const {
 Function* FunctionAST::codegen() const {
     Function *TheFunction = TheModule->getFunction(m_proto.name());
 
-    if (!TheFunction)
+    if (!TheFunction) {
         TheFunction = m_proto.codegen();
+    }
 
-    if (!TheFunction)
+    if (!TheFunction) {
         return nullptr;
+    }
 
     if (!TheFunction->empty()) {
         cerr << "Nije dozvoljeno predefinisanje fje " << m_proto.name() << endl;
+        error = true;
         return nullptr;
     }
     
@@ -68,12 +72,13 @@ Function* FunctionAST::codegen() const {
     Value *RetVal = m_body->codegen();
     if(RetVal != nullptr) {
         verifyFunction(*TheFunction);
-        cout << "pusi kurac" << endl;
         TheFPM->run(*TheFunction);
         namedValues.clear();
         namedValues = tmpNamedValues;
         return TheFunction;
     }
     TheFunction->eraseFromParent();
+    cout << "Greska u funkciji: " << m_proto.name() << endl;
+    error = true;
     return nullptr;
 }

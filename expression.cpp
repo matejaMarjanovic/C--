@@ -5,6 +5,7 @@ map<string, pair<AllocaInst*, Types>> namedValues;
 IRBuilder<> Builder(TheContext);
 Module* TheModule;
 legacy::FunctionPassManager* TheFPM;
+bool error = false;
 
 Value* BinOpExprAST::codegen() const {
     Value* lhs = m_lhs->codegen();
@@ -96,6 +97,7 @@ Value* VariableExprAST::codegen() const {
     AllocaInst* tmp = namedValues[m_name].first;
     if (tmp == nullptr) {
         cerr << "Promenljiva " + m_name + " nije definisana" << endl;
+        error = true;
         return nullptr;
     }
     if(namedValues[m_name].second == Double) {
@@ -103,13 +105,13 @@ Value* VariableExprAST::codegen() const {
     } else if(namedValues[m_name].second == Int) {
         return Builder.CreateLoad(Type::getInt32Ty(TheContext), tmp, m_name.c_str());
     }
-//     return nullptr;
 }
 
 Types VariableExprAST::type() {
     pair<AllocaInst*, Types>* a = new pair<AllocaInst*, Types>(namedValues[m_name]);
     if(a == nullptr) {
-        cerr << "Promenljiva " << m_name << " nije definisana pusi kurac" << endl;
+        cerr << "Promenljiva " << m_name << " nije definisana" << endl;
+        error = true;
     }
     return a->second;
 }
@@ -131,12 +133,14 @@ Value* FuncCallExprAST::codegen() const {
     Function *CalleeF = TheModule->getFunction(m_name);
     if (!CalleeF) {
         cerr << "Fja " << m_name << " nije definisana" << endl;
+        error = true;
         return nullptr;
     }
 
     // If argument mismatch error.
     if (CalleeF->arg_size() != m_args.size()) {
         cout << "Fja " << m_name << " prima " << CalleeF->arg_size() << " argumenata" << endl;
+        error = true;
         return nullptr;
     }
 
@@ -144,6 +148,8 @@ Value* FuncCallExprAST::codegen() const {
     for (unsigned i = 0, e = m_args.size(); i != e; ++i) {
         ArgsV.push_back(m_args[i]->codegen());
         if (!ArgsV.back()) {
+            cout << "argument funkcije " << m_name << " ne moze da se izracuna" << endl;
+            error = true;
             return nullptr;
         }
     }
